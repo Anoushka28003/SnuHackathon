@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEHUMAN - No Barriers Just Conversation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ <!-- MediaPipe -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script> 
+  <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #0891b2;
+            --accent: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --success: #10b981;
+            --gradient: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
+        }
+
+        body {
+            background: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 8rem 5% 4rem;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 80%;
+            height: 150%;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .hero-content {
+            flex: 1;
+            max-width: 600px;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+
+        .hero h1 span {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 1.5rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tagline i {
+            color: var(--accent);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .hero-image {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .hero-visual {
+            width: 500px;
+            height: 500px;
+            background: var(--gradient);
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            animation: morph 8s ease-in-out infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 20px 60px rgba(37, 99, 235, 0.2);
+        }
+
+        @keyframes morph {
+            0%, 100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; }
+            25% { border-radius: 58% 42% 75% 25% / 76% 46% 54% 24%; }
+            50% { border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%; }
+            75% { border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%; }
+        }
+
+        .hero-visual i {
+            font-size: 8rem;
+            color: white;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Features Section */
+        .features {
+            padding: 6rem 5%;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .section-title p {
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--light);
+            padding: 2rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: var(--gradient);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-icon i {
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .feature-card p {
+            color: var(--gray);
+            line-height: 1.7;
+        }
+
+        /* Communication Interface */
+        .communication {
+            padding: 6rem 5%;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: white;
+        }
+
+        .communication .section-title h2 {
+            color: white;
+        }
+
+        .communication .section-title p {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .comm-interface {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .comm-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .comm-tab {
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .comm-tab.active, .comm-tab:hover {
+            background: var(--primary);
+        }
+
+        .comm-content {
+            display: none;
+        }
+
+        .comm-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Chat Interface */
+        .chat-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            overflow: hidden;
+            color: var(--dark);
+        }
+
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            animation: messageIn 0.3s ease;
+        }
+
+        @keyframes messageIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.sent {
+            background: var(--gradient);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.received {
+            background: #e2e8f0;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+
+        .chat-input-area {
+            padding: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .chat-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 1rem 1.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .chat-send-btn {
+            padding: 1rem 2rem;
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chat-send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Gesture Input Section */
+        .gesture-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            color: var(--dark);
+        }
+
+        .gesture-display {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-radius: 20px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gesture-display i {
+            font-size: 6rem;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .gesture-text {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+
+        .gesture-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .gesture-btn {
+            padding: 1rem 2rem;
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .gesture-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Audio Section */
+        .audio-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            color: var(--dark);
+        }
+
+        .audio-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .audio-btn {
+            width: 120px;
+            height: 120px;
+            background: var(--gradient);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+        }
+
+        .audio-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .audio-btn.recording {
+            animation: pulse 1s ease-in-out infinite;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .audio-btn i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .audio-status {
+            text-align: center;
+        }
+
+        .audio-status h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .audio-status p {
+            color: var(--gray);
+        }
+
+        .transcript-area {
+            width: 100%;
+            background: #f1f5f9;
+            border-radius: 15px;
+            padding: 1.5rem;
+            min-height: 100px;
+        }
+
+        .transcript-area h4 {
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        /* About Section */
+        .about {
+            padding: 6rem 5%;
+            background: var(--light);
+        }
+
+        .about-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-text h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+
+        .about-text p {
+            color: var(--gray);
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .about-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .about-image {
+            display: flex;
+            justify-content: center;
+        }
+
+        .about-visual {
+            width: 400px;
+            height: 400px;
+            background: var(--gradient);
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            animation: morph 8s ease-in-out infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .about-visual i {
+            font-size: 10rem;
+            color: white;
+        }
+        .video-section{
+    width: 100%;
+    padding: 80px 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;      /* horizontal center */
+    justify-content: center;  /* vertical center */
+
+    text-align: center;       /* center text */
+    margin: 0 auto;
+}
+
+/* title */
+.video-section h3{
+    font-size: 2rem;
+    margin-bottom: 25px;
+}
+
+/* video */
+.video-section iframe{
+    width: 100%;
+    max-width: 800px;     /* control size */
+    aspect-ratio: 16 / 9; /* perfect video ratio */
+
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+
+    display: block;
+    margin: 0 auto;       /* force center */
+}
+
+        /* Contact Section */
+        .contact {
+            padding: 6rem 5%;
+            background: white;
+        }
+
+        .contact-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .contact-form {
+            background: var(--light);
+            padding: 3rem;
+            border-radius: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 4rem 5% 2rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .footer-section p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Accessibility Features */
+        .accessibility-panel {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 1000;
+        }
+
+        .accessibility-btn {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(37, 99, 235, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .accessibility-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .accessibility-btn i {
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .accessibility-menu {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            background: white;
+            border-radius: 15px;
+            padding: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+            min-width: 200px;
+        }
+
+        .accessibility-menu.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .accessibility-menu button {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: none;
+            background: transparent;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .accessibility-menu button:hover {
+            background: var(--light);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .hero {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-visual {
+                width: 300px;
+                height: 300px;
+            }
+
+            .hero-visual i {
+                font-size: 5rem;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+
+            .about-visual {
+                width: 300px;
+                height: 300px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .section-title h2 {
+                font-size: 1.8rem;
+            }
+
+            .comm-tabs {
+                justify-content: center;
+            }
+
+            .comm-tab {
+                padding: 0.8rem 1.2rem;
+                font-size: 0.9rem;
+            }
+
+            .about-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* High Contrast Mode */
+        body.high-contrast {
+            --primary: #0000ff;
+            --dark: #000000;
+            --light: #ffffff;
+            --gray: #333333;
+        }
+
+        body.high-contrast .feature-card,
+        body.high-contrast .comm-interface,
+        body.high-contrast .gesture-section,
+        body.high-contrast .audio-section {
+            border: 2px solid #000;
+        }
+
+        /* Large Text Mode */
+        body.large-text {
+            font-size: 1.2rem;
+        }
+
+        body.large-text h1 {
+            font-size: 4rem;
+        }
+
+        body.large-text h2 {
+            font-size: 3rem;
+        }
+
+        /* Screen Reader Only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav role="navigation" aria-label="Main navigation">
+        <div class="logo">We<span><i>Human</i></span></div>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#communication">Communicate</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+        <a href="#communication" class="btn btn-primary">
+            <i class="fas fa-comments"></i>
+            Start Communicating
+        </a>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <h1>Bridging Communication <span>Gaps</span></h1>
+            <div class="tagline">
+                <i class="fas fa-universal-access"></i>
+                No Barriers Just Conversation
+            </div>
+            <p style="margin-bottom: 2rem; color: var(--gray); font-size: 1.1rem;">
+                WEHUMAN is an innovative communication system designed to break down barriers between deaf, dumb, and blind individuals and the world around them. Experience seamless communication through text, gestures, and voice.
+            </p>
+            <div class="hero-buttons">
+                <a href="#communication" class="btn btn-primary">
+                    <i class="fas fa-rocket"></i>
+                    Get Started
+                </a>
+                <a href="#features" class="btn btn-outline">
+                    <i class="fas fa-info-circle"></i>
+                    Learn More
+                </a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <div class="hero-visual">
+                <i class="fas fa-hands-helping"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="section-title">
+            <h2>Powerful Features</h2>
+            <p>Our comprehensive communication tools are designed to make interaction effortless and inclusive for everyone</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-hands"></i>
+                </div>
+                <h3>Gesture Recognition</h3>
+                <p>Convert hand gestures into text messages in real-time. Our advanced AI understands various sign languages and hand movements to facilitate smooth communication.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-microphone"></i>
+                </div>
+                <h3>Voice to Text</h3>
+                <p>Speak naturally and watch your words transform into text instantly. Perfect for quick messaging and maintaining the flow of conversation.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-text-height"></i>
+                </div>
+                <h3>Text to Speech</h3>
+                <p>Convert written messages into natural-sounding speech. Help blind users access information through audio output with our text-to-speech engine.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-sign-language"></i>
+                </div>
+                <h3>Text to Gestures</h3>
+                <p>Transform text messages into visual gesture animations. Display sign language representations to help deaf users understand spoken content.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-universal-access"></i>
+                </div>
+                <h3>Accessibility First</h3>
+                <p>Built with accessibility at its core. High contrast modes, large text options, and screen reader compatibility ensure everyone can use WEHUMAN.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <h3>Conversation History</h3>
+                <p>Never lose important messages. Store and retrieve your conversation history anytime, with options to export and share discussions.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Communication Interface -->
+    <section class="communication" id="communication">
+        <div class="section-title">
+            <h2>Communication Center</h2>
+            <p>Choose your preferred method of communication and start connecting with the world</p>
+        </div>
+        <div class="comm-interface">
+            <div class="comm-tabs" role="tablist">
+                <button class="comm-tab active" data-tab="text-chat" role="tab" aria-selected="true">
+                    <i class="fas fa-comments"></i>
+                    Text Chat
+                </button>
+                <button class="comm-tab" data-tab="gesture-input" role="tab" aria-selected="false">
+                    <i class="fas fa-hand-paper"></i>
+                    Gesture Input
+                </button>
+                <button class="comm-tab" data-tab="voice-input" role="tab" aria-selected="false">
+                    <i class="fas fa-microphone"></i>
+                    Voice Input
+                </button>
+                <button class="comm-tab" data-tab="text-to-speech" role="tab" aria-selected="false">
+                    <i class="fas fa-volume-up"></i>
+                    Text to Speech
+                </button>
+            </div>
+
+            <!-- Text Chat -->
+            <div class="comm-content active" id="text-chat" role="tabpanel">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages" role="log" aria-live="polite">
+                        <div class="message received">
+                            <p>Welcome to WEHUMAN! 👋</p>
+                            <span class="message-time">Just now</span>
+                        </div>
+                        <div class="message received">
+                            <p>Start typing to begin your conversation. Your messages will appear here in real-time.</p>
+                            <span class="message-time">Just now</span>
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" class="chat-input" id="chat-input" placeholder="Type your message here..." aria-label="Message input">
+                        <button class="chat-send-btn" id="send-message">
+                            <i class="fas fa-paper-plane"></i>
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gesture Input -->
+            <div class="comm-content" id="gesture-input" role="tabpanel">
+                <div class="gesture-section">
+                    <div class="gesture-section">
+
+    <div class="cam-wrapper" style="position:relative;">
+        <video id="input_video" playsinline style="width:100%; border-radius:20px;"></video>
+        <canvas id="output_canvas" style="position:absolute; left:0; top:0;"></canvas>
+
+        <div id="gesture-label"
+             style="position:absolute; bottom:10px; left:10px;
+             background:white; padding:8px 12px; border-radius:10px;">
+            Waiting for hand...
+        </div>
+    </div>
+
+    <div style="margin-top:15px;">
+        <input type="password" id="apiKey"
+        placeholder="Enter OpenAI API Key (Optional)">
+    </div>
+
+</div>
+                                          
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice Input -->
+            <div class="comm-content" id="voice-input" role="tabpanel">
+                <div class="audio-section">
+                    <div class="audio-controls">
+                        <button class="audio-btn" id="record-btn" aria-label="Start recording">
+                            <i class="fas fa-microphone" id="record-icon"></i>
+                        </button>
+                        <div class="audio-status">
+                            <h3 id="audio-status-text">Click to Start Recording</h3>
+                            <p id="audio-status-sub">Your voice will be converted to text</p>
+                        </div>
+                        <div class="transcript-area">
+                            <h4>Transcript:</h4>
+                            <p id="voice-transcript">No speech detected yet. Click the microphone button and start speaking.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Text to Speech -->
+            <div class="comm-content" id="text-to-speech" role="tabpanel">
+                <div class="audio-section">
+                    <div class="audio-controls">
+                        <div style="width: 100%;">
+                            <div class="form-group">
+                                <label for="tts-input">Enter text to convert to speech:</label>
+                                <textarea id="tts-input" placeholder="Type or paste the text you want to convert to speech...">Hello! Welcome to WEHUMAN. No barriers, just conversation.</textarea>
+                            </div>
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+                              <!----  <button class="gesture-btn" onclick="convertToSpeech()">
+                                    <i class="fas fa-play"></i>
+                                    Play Audio
+                                </button>-->
+                                <button class="ts" onclick="speakText()" style="
+    display: inline-flex;
+    align-items: center;
+    gap: 8px; /* space between icon and text */
+    padding: 10px 20px;
+    background: linear-gradient(90deg, #3b82f6, #06b6d4); /* blue to cyan gradient */
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+
+.ts:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.ts i {
+    font-size: 18px; /* size of the download icon */
+}">Speak</button>
+
+
+<script>
+function speakText() {
+    const text = document.getElementById('textInput').value;
+    const speech = new SpeechSynthesisUtterance(text);
+    speech.lang = 'en-US';
+    window.speechSynthesis.speak(speech);
+}
+<style>
+
+</style>
+</script>
+                                <button class="gesture-btn" onclick="stopSpeech()">
+                                    <i class="fas fa-stop"></i>
+                                    Stop
+                                </button>
+                                <button class="gesture-btn" onclick="downloadAudio()">
+                                    <i class="fas fa-download"></i>
+                                    Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="about-content">
+            <div class="about-text">
+                <h2>About WEHUMAN</h2>
+                <p>WEHUMAN was born from a simple yet powerful idea: everyone deserves to communicate freely, regardless of their physical abilities. We believe that communication is a fundamental human right that should be accessible to all.</p>
+                <p>Our platform integrates cutting-edge technology with user-centric design to create a seamless communication experience. Whether you're deaf, mute, blind, or simply want to communicate with someone who is, WEHUMAN bridges the gap.</p>
+                <!-- <div class="about-stats">
+                    <div class="stat-item">
+                       <div class="stat-number">10M+</div>
+                        <div class="stat-label">Messages Sent</div>-->
+                    </div>
+                    <div class="stat-item">
+                        <!--<div class="stat-number">50K+</div>
+                        <div class="stat-label">Active Users</div>
+                    </div>
+                    <div class="stat-item">
+                       <div class="stat-number">99.9%</div>
+                        <div class="stat-label">Uptime</div>
+                    </div>
+                </div>
+            </div>-->
+            <div class="about-image">
+                <div class="about-visual">
+                    <i class="fas fa-globe-americas"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--small course link-->
+<section class="video-section">
+    <h3>Learn Sign Language</h3>
+
+    <iframe
+        src="https://www.youtube.com/embed/v1desDduz5M"
+        allowfullscreen>
+    </iframe>
+</section>
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="contact-container">
+            <div class="section-title">
+                <h2>Get in Touch</h2>
+                <p>Have questions or feedback? We'd love to hear from you</p>
+            </div>
+            <form class="contact-form" onsubmit="handleContactSubmit(event)">
+                <div class="form-group">
+                    <label for="name">Your Name</label>
+                    <input type="text" id="name" placeholder="Enter your name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" placeholder="What is this about?">
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" placeholder="Write your message here..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <i class="fas fa-paper-plane"></i>
+                    Send Message
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>WEHUMAN</h3>
+                <p>Bridging communication gaps worldwide. No barriers, just conversation. Making the world more inclusive one conversation at a time.</p>
+                <div class="social-links">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#communication">Communicate</a></li>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Resources</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Accessibility Guide</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Community Forum</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Info</h3>
+                <ul class="footer-links">
+                    <li><i class="fas fa-envelope"></i> support@wehuman.com</li>
+                    <li><i class="fas fa-phone"></i>+98 9818652188</li>
+                    <li><i class="fas fa-map-marker-alt"></i> New Delhi, India</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 WEHUMAN. All rights reserved. Made with <i class="fas fa-heart" style="color: #ef4444;"></i> for everyone.</p>
+        </div>
+    </footer>
+
+    <!-- Accessibility Panel -->
+    <div class="accessibility-panel">
+        <button class="accessibility-btn" onclick="toggleAccessibilityMenu()" aria-label="Accessibility options">
+            <i class="fas fa-universal-access"></i>
+        </button>
+        <div class="accessibility-menu" id="accessibility-menu">
+            <button onclick="toggleHighContrast()">
+                <i class="fas fa-adjust"></i>
+                High Contrast
+            </button>
+            <button onclick="toggleLargeText()">
+                <i class="fas fa-text-height"></i>
+                Large Text
+            </button>
+            <button onclick="readPageContent()">
+                <i class="fas fa-book-reader"></i>
+                Read Page
+            </button>
+            <button onclick="resetAccessibility()">
+                <i class="fas fa-undo"></i>
+                Reset All
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Tab functionality
+        
+        const tabs = document.querySelectorAll('.comm-tab');
+        const contents = document.querySelectorAll('.comm-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.dataset.tab;
+                
+                tabs.forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+                
+                contents.forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
+                document.getElementById(target).classList.add('active');
+            });
+        });
+
+        // Chat functionality
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-message');
+        const chatMessages = document.getElementById('chat-messages');
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const sentMessage = document.createElement('div');
+                sentMessage.className = 'message sent';
+                sentMessage.innerHTML = `
+                    <p>${escapeHtml(message)}</p>
+                    <span class="message-time">${time}</span>
+                `;
+                chatMessages.appendChild(sentMessage);
+                chatInput.value = '';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Simulate response
+                setTimeout(() => {
+                    const responses = [
+                        "I understand! Thanks for sharing.",
+                        "That's great to hear!",
+                        "I appreciate your message.",
+                        "Got it! Let me know if you need anything else.",
+                        "Wonderful! Looking forward to hearing more."
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    
+                    const receivedMessage = document.createElement('div');
+                    receivedMessage.className = 'message received';
+                    receivedMessage.innerHTML = `
+                        <p>${randomResponse}</p>
+                        <span class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    `;
+                    chatMessages.appendChild(receivedMessage);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // Gesture simulation
+        const gestureIcons = {
+            'hello': 'fa-hand-sparkles',
+            'thankyou': 'fa-hands-praying',
+            'help': 'fa-hand-holding-medical',
+            'yes': 'fa-thumbs-up',
+            'no': 'fa-thumbs-down',
+            'iloveyou': 'fa-heart'
+        };
+
+        const gestureTexts = {
+            'hello': 'Gesture: Hello 👋',
+            'thankyou': 'Gesture: Thank You 🙏',
+            'help': 'Gesture: Help 🆘',
+            'yes': 'Gesture: Yes 👍',
+            'no': 'Gesture: No 👎',
+            'iloveyou': 'Gesture: I Love You ❤️'
+        };
+
+        function simulateGesture(gesture) {
+            const icon = document.getElementById('gesture-icon');
+            const text = document.getElementById('gesture-text');
+            
+            icon.className = `fas ${gestureIcons[gesture]}`;
+            text.textContent = gestureTexts[gesture];
+            
+            // Add to chat
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const sentMessage = document.createElement('div');
+            sentMessage.className = 'message sent';
+            sentMessage.innerHTML = `
+                <p>${gestureTexts[gesture]}</p>
+                <span class="message-time">${time}</span>
+            `;
+            chatMessages.appendChild(sentMessage);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Voice recording simulation
+        const recordBtn = document.getElementById('record-btn');
+        const recordIcon = document.getElementById('record-icon');
+        const audioStatusText = document.getElementById('audio-status-text');
+        const audioStatusSub = document.getElementById('audio-status-sub');
+        const voiceTranscript = document.getElementById('voice-transcript');
+        let isRecording = false;
+
+        recordBtn.addEventListener('click', () => {
+            isRecording = !isRecording;
+            
+            if (isRecording) {
+                recordBtn.classList.add('recording');
+                recordIcon.className = 'fas fa-stop';
+                audioStatusText.textContent = 'Recording...';
+                audioStatusSub.textContent = 'Speak clearly into your microphone';
+                voiceTranscript.textContent = 'Listening...';
+                
+                // Simulate speech recognition
+                setTimeout(() => {
+                    const phrases = [
+                        "Hello, how are you today?",
+                        "I would like to learn more about WEHUMAN.",
+                        "This technology is amazing!",
+                    ];
+                    const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+                    voiceTranscript.textContent = randomPhrase;
+                    audioStatusText.textContent = 'Speech Detected';
+                    audioStatusSub.textContent = 'Text has been generated';
+                }, 3000);
+            } else {
+                recordBtn.classList.remove('recording');
+                recordIcon.className = 'fas fa-microphone';
+                audioStatusText.textContent = 'Recording Paused';
+                audioStatusSub.textContent = 'Click to continue recording';
+            }
+        });
+
+        // Text to Speech
+        let speechSynthesis = window.speechSynthesis;
+        let currentUtterance = null;
+
+        function convertToSpeech() {
+            const text = document.getElementById('tts-input').value;
+            if (text.trim()) {
+                if (currentUtterance) {
+                    speechSynthesis.cancel();
+                }
+                
+                currentUtterance = new SpeechSynthesisUtterance(text);
+                currentUtterance.rate = 1;
+                currentUtterance.pitch = 1;
+                currentUtterance.volume = 1;
+                
+                speechSynthesis.speak(currentUtterance);
+            }
+        }
+
+        function stopSpeech() {
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+            }
+        }
+
+        function downloadAudio() {
+            const text = document.getElementById('tts-input').value;
+            if (text.trim()) {
+                alert('Audio download feature would generate an MP3 file with the text content. In a production environment, this would connect to a text-to-speech API service.');
+            }
+        }
+
+        // Contact form
+        function handleContactSubmit(event) {
+            event.preventDefault();
+            alert('Thank you for your message! We will get back to you within 24-48 hours.');
+            event.target.reset();
+        }
+
+        // Accessibility functions
+        function toggleAccessibilityMenu() {
+            const menu = document.getElementById('accessibility-menu');
+            menu.classList.toggle('show');
+        }
+
+        function toggleHighContrast() {
+            document.body.classList.toggle('high-contrast');
+        }
+
+        function toggleLargeText() {
+            document.body.classList.toggle('large-text');
+        }
+
+        function readPageContent() {
+            const text = document.body.innerText;
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance('Reading page content. This feature reads the entire page text aloud.');
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function resetAccessibility() {
+            document.body.classList.remove('high-contrast', 'large-text');
+        }
+
+        // Close accessibility menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('accessibility-menu');
+            const btn = document.querySelector('.accessibility-btn');
+            if (!menu.contains(e.target) && !btn.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        // Utility function
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add scroll effect to navigation
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.15)';
+            } else {
+                nav.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+            }
+        });
+    
+/*const videoElement = document.getElementById('input_video');
+const canvasElement = document.getElementById('output_canvas');
+const canvasCtx = canvasElement.getContext('2d');
+const gestureLabel = document.getElementById('gesture-label');
+
+const hands = new Hands({
+    locateFile: (file) =>
+        `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+});
+const videoElement = document.getElementById("input_video");
+const canvasElement = document.getElementById("output_canvas");
+const canvasCtx = canvasElement.getContext("2d");
+const gestureLabel = document.getElementById("gesture-label");
+
+/* ---------- HANDS SETUP ---------- */
+const videoElement = document.getElementById("input_video");
+const canvasElement = document.getElementById("output_canvas");
+const canvasCtx = canvasElement.getContext("2d");
+const gestureLabel = document.getElementById("gesture-label");
+
+/* ---- FIX CANVAS SIZE ---- */
+videoElement.onloadedmetadata = () => {
+  canvasElement.width = videoElement.videoWidth;
+  canvasElement.height = videoElement.videoHeight;
+};
+
+/* ---- HANDS SETUP ---- */
+const hands = new Hands({
+  locateFile: file =>
+    `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+});
+
+hands.setOptions({
+  maxNumHands: 1,
+  modelComplexity: 1,
+  minDetectionConfidence: 0.7,
+  minTrackingConfidence: 0.7
+});
+
+hands.onResults(onResults);
+
+/* ---- CAMERA ---- */
+const camera = new Camera(videoElement, {
+  onFrame: async () => {
+    await hands.send({ image: videoElement });
+  },
+  width: 640,
+  height: 480
+});
+camera.start();
+
+/* ---- RESULTS ---- */
+function onResults(results) {
+
+  canvasCtx.save();
+  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  canvasCtx.drawImage(results.image, 0, 0,
+    canvasElement.width, canvasElement.height);
+
+  if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+
+    const lm = results.multiHandLandmarks[0];
+
+    drawConnectors(canvasCtx, lm, HAND_CONNECTIONS,
+      { color: "#00FF00", lineWidth: 3 });
+    drawLandmarks(canvasCtx, lm,
+      { color: "#FF0000", lineWidth: 2 });
+
+    detectGesture(lm);
+
+  } else {
+    gestureLabel.innerText = "No hand detected";
+  }
+
+  canvasCtx.restore();
+}
+
+/* ---- GESTURE DETECTION ---- */
+function detectGesture(lm) {
+
+  const thumbUp = lm[4].x < lm[3].x;
+  const indexUp = lm[8].y < lm[6].y;
+  const middleUp = lm[12].y < lm[10].y;
+  const ringUp = lm[16].y < lm[14].y;
+  const pinkyUp = lm[20].y < lm[18].y;
+
+  let gesture = "Hand detected";
+
+  if (thumbUp && indexUp && middleUp && ringUp && pinkyUp)
+    gesture = "Hello 👋";
+
+  else if (thumbUp && !indexUp && !middleUp && !ringUp && !pinkyUp)
+    gesture = "Yes 👍";
+
+  else if (!thumbUp && indexUp && !middleUp && !ringUp && !pinkyUp)
+    gesture = "No ☝️";
+
+  else if (thumbUp && indexUp && !middleUp && !ringUp && pinkyUp)
+    gesture = "I Love You ❤️";
+
+  gestureLabel.innerText = gesture;
+}
+</script>
+
+
+
+    </script>
+</body>
+</html>
